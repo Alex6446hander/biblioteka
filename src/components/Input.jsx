@@ -1,26 +1,15 @@
-import React, { useState } from 'react';
-import styles from './Input.module.css';
+import React, { useState } from "react";
 
-interface InputProps {
-  label?: string;
-  type?: 'text' | 'password' | 'email';
-  placeholder?: string;
-  error?: string;
-  value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  isPassword?: boolean;
-}
-
-const Input = ({ label, type = 'text', placeholder, error, value, onChange, isPassword = false }: InputProps) => {
+const Input = ({ label, type = "text", placeholder, error, value, onChange, isPassword = false }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const inputType = isPassword ? (showPassword ? 'text' : 'password') : type;
+  const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
   return (
-    <div className={styles.inputWrapper}>
-      {label && <label className={styles.label}>{label}</label>}
-      <div className={styles.relativeContainer}>
+    <div className="w-full mb-4">
+      {label && <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>}
+      <div className="relative">
         <input
           type={inputType}
           placeholder={placeholder}
@@ -28,25 +17,29 @@ const Input = ({ label, type = 'text', placeholder, error, value, onChange, isPa
           onChange={onChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          className={`${styles.baseInput} ${isFocused ? styles.inputFocused : styles.inputDefault} ${error ? styles.inputError : ''} ${value ? styles.inputBgWhite : styles.inputBgWhite}`}
+          className={`w-full px-3 py-2 border rounded-md transition-all duration-200 outline-none
+            ${isFocused ? "border-blue-500 ring-1 ring-blue-200" : "border-gray-300"}
+            ${error ? "border-red-500" : ""}
+            ${value ? "bg-white" : "bg-white"}
+          `}
         />
         {isPassword && (
           <button
             type="button"
-            className={styles.passwordButton}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             onClick={() => setShowPassword(!showPassword)}
           >
-            {showPassword ? '👁' : '🙈'}
+            {showPassword ? "??" : "??"}
           </button>
         )}
-      </div >
+      </div>
       {error && (
-        <div className={styles.errorMessage}>
-          <span className={styles.warningIcon}>⚠️</span>
+        <div className="flex items-center mt-1 text-red-500 text-xs">
+          <span className="mr-1">??</span>
           <span>{error}</span>
-        </div >
+        </div>
       )}
-    </div >
+    </div>
   );
 };
 
