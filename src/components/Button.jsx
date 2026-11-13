@@ -1,4 +1,5 @@
 import React from 'react';
+import styles from './Button.module.css';
 
 interface ButtonProps {
   label: string;
@@ -9,20 +10,13 @@ interface ButtonProps {
 }
 
 const Button = ({ label, variant = 'primary', isLoading, disabled, onClick }: ButtonProps) => {
-  const baseStyles = "px-6 py-2 rounded font-medium transition-all duration-200 flex items-center justify-center";
-  
-  const variants = {
-    primary: "bg-blue-600 text-white hover:bg-blue-700 active:scale-95",
-    secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 active:scale-95",
-    outline: "border border-gray-300 text-gray-700 hover:bg-gray-50 active:scale-95"
-  };
-
-  const disabledStyles = disabled ? "opacity-50 cursor-not-allowed pointer-events-none" : "";
-  const loadingStyles = isLoading ? "cursor-wait" : "";
+  const variantClass = styles[variant];
+  const disabledClass = disabled ? styles.disabled : "";
+  const loadingClass = isLoading ? styles.loading : "";
 
   return (
     <button 
-      className={`${baseStyles} ${variants[variant]} ${disabledStyles} ${loadingStyles}`}
+      className={`${styles.button} ${variantClass} ${disabledClass} ${loadingClass}`}
       onClick={onClick}
       disabled={disabled || isLoading}
     >

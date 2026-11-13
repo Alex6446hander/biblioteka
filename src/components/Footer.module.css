@@ -1,0 +1,11 @@
+.footer {
+  @apply w-full border-t border-gray-200 py-8 bg-white;
+}
+
+.footerContent {
+  @apply max-w-7xl mx-auto px-4 flex justify-between items-center;
+}
+
+.footerText {
+  @apply text-gray-600 text-sm;
+}

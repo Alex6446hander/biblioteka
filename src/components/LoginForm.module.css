@@ -1,0 +1,43 @@
+.container {
+  @apply max-w-md mx-auto p-8 bg-white border border-gray-200 rounded-lg shadow-sm;
+}
+
+.tabsContainer {
+  @apply flex border-b mb-6;
+}
+
+.tabButton {
+  @apply flex-1 py-2;
+}
+
+.activeTab {
+  @apply border-b-2 border-blue-600 font-bold;
+}
+
+.inactiveTab {
+  @apply text-gray-500;
+}
+
+.form {
+  @apply space-y-4;
+}
+
+.label {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+.input {
+  @apply w-full p-2 border border-gray-300 rounded mt-1;
+}
+
+.submitButton {
+  @apply w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition;
+}
+
+.footerText {
+  @apply mt-4 text-center text-sm text-gray-600;
+}
+
+.link {
+  @apply text-blue-600 hover:underline;
+}

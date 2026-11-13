@@ -1,0 +1,43 @@
+.inputWrapper {
+  @apply w-full mb-4;
+}
+
+.label {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+.relativeContainer {
+  @apply relative;
+}
+
+.baseInput {
+  @apply w-full px-3 py-2 border rounded-md transition-all duration-200 outline-none;
+}
+
+.inputFocused {
+  @apply border-blue-500 ring-1 ring-blue-200;
+}
+
+.inputDefault {
+  @apply border-gray-300;
+}
+
+.inputError {
+  @apply border-red-500;
+}
+
+.inputBgWhite {
+  @apply bg-white;
+}
+
+.passwordButton {
+  @apply absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600;
+}
+
+.errorMessage {
+  @apply flex items-center mt-1 text-red-500 text-xs;
+}
+
+.warningIcon {
+  @apply mr-1;
+}

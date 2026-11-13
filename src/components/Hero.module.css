@@ -1,0 +1,19 @@
+.heroSection {
+  @apply max-w-7xl mx-auto px-4 py-20 flex flex-col md:flex-row items-center justify-between;
+}
+
+.title {
+  @apply text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight mb-6;
+}
+
+.description {
+  @apply text-lg md:text-xl text-gray-600 max-w-lg mb-8;
+}
+
+.buttonPrimary {
+  @apply bg-blue-600 text-white px-8 py-3 rounded-md font-semibold text-lg hover:bg-blue-700 transition shadow-lg hover:shadow-xl flex items-center;
+}
+
+.visualPlaceholder {
+  @apply w-full h-80 bg-blue-50 rounded-2xl flex items-center justify-center border-2 border-dashed border-blue-200 text-blue-300 text-xl;
+}

@@ -1,17 +1,18 @@
 import React from 'react';
+import styles from './Footer.module.css';
 
 const Footer = () => {
   return (
-    <footer className="w-full border-t border-gray-200 py-8 bg-white">
-      <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
-        <div className="text-gray-600 text-sm">
+    <footer className={styles.footer}>
+      <div className={styles.footerContent}>
+        <div className={styles.footerText}>
           СУД — Система управления документами
-        </div>
-        <div className="text-gray-600 text-sm">
+        </div >
+        <div className={styles.footerText}>
           2024
-        </div>
-      </div>
-    </footer>
+        </div >
+      </div >
+    </footer >
   );
 };
 
