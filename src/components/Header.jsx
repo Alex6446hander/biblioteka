@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
 
-const Header = () => {
+const Header = ({ onLogin, onRegister }) => {
   const { user, logout } = useAuth();
 
   return (
@@ -27,10 +27,16 @@ const Header = () => {
           </div>
         ) : (
           <div className="flex items-center gap-4">
-            <button className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            <button 
+              onClick={onRegister}
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
               Регистрация
             </button>
-            <button className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90">
+            <button 
+              onClick={onLogin}
+              className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
+            >
               Войти
             </button>
           </div>

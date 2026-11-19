@@ -17,10 +17,10 @@ const AppContent = ({ currentPage, setCurrentPage }) => {
   }, [user, currentPage, setCurrentPage]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
-      <main>
+      <main className="flex-grow">
         {currentPage === 'landing' && <LandingPage />}
         {currentPage === 'login' && <LoginPage onRegisterSuccess={() => setCurrentPage('login')} />}
         {currentPage === 'register' && <RegisterPage onRegisterSuccess={() => setCurrentPage('login')} />}
@@ -33,22 +33,6 @@ const AppContent = ({ currentPage, setCurrentPage }) => {
           </div>
         )}
       </main>
-
-      {/* Navigation for development */}
-      <nav className="fixed bottom-4 right-4 bg-gray-800 text-white p-2 rounded-full shadow-lg z-50 flex gap-2">
-        <button className="px-2 hover:text-blue-400" onClick={() => setCurrentPage('landing')}>Landing</button>
-        {user ? (
-          <>
-            <button className="px-2 hover:text-blue-400" onClick={() => setCurrentPage('dashboard')}>Dash</button>
-            <button className="px-2 hover:text-blue-400" onClick={() => setCurrentPage('profile')}>Profile</button>
-          </>
-        ) : (
-          <>
-            <button className="px-2 hover:text-blue-400" onClick={() => setCurrentPage('login')}>Login</button>
-            <button className="px-2 hover:text-blue-400" onClick={() => setCurrentPage('register')}>Register</button>
-          </>
-        )}
-      </nav>
     </div>
   );
 };

@@ -1,22 +1,62 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FileText, Folder, Bell, User } from 'lucide-react';
+import { FileText, Folder, Bell, User, Plus, LayoutDashboard } from 'lucide-react';
 import { cn } from '../lib/utils';
+import DocumentList from '../components/DocumentList';
+import CreateDocumentModal from '../components/CreateDocumentModal';
+import CabinetList from '../components/CabinetList';
+import CreateCabinetModal from '../components/CreateCabinetModal';
+import CabinetDetailModal from '../components/CabinetDetailModal';
+import { MOCK_DOCUMENTS } from '../data/mockDocuments';
+import { MOCK_CABINETS } from '../data/mockCabinets';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const [documents, setDocuments] = useState(MOCK_DOCUMENTS);
+  const [cabinets, setCabinets] = useState(MOCK_CABINETS);
+  const [isDocModalOpen, setIsDocModalOpen] = useState(false);
+  const [isCabinetModalOpen, setIsCabinetModalOpen] = useState(false);
+  const [selectedCabinet, setSelectedCabinet] = useState(null);
 
   const stats = [
-    { label: 'Всего документов', value: '124', icon: FileText, color: 'text-blue-600', bg: 'bg-blue-100' },
-    { label: 'В шкафах', value: '48', icon: Folder, color: 'text-emerald-600', bg: 'bg-emerald-100' },
+    { label: 'Всего документов', value: documents.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-100' },
+    { label: 'В шкафах', value: cabinets.length, icon: Folder, color: 'text-emerald-600', bg: 'bg-emerald-100' },
     { label: 'Ожидают проверки', value: '12', icon: Bell, color: 'text-amber-600', bg: 'bg-amber-100' },
   ];
+
+  const handleCreateDocument = (newDocData) => {
+    const newDoc = {
+      id: (documents.length + 1).toString(),
+      ...newDocData,
+      status: 'Активный',
+      date: new Date().toISOString().split('T')[0],
+      owner: user?.name || 'Александр',
+    };
+    setDocuments([newDoc, ...documents]);
+    setIsDocModalOpen(false);
+  };
+
+  const handleCreateCabinet = (newCabinetData) => {
+    const newCabinet = {
+      id: (cabinets.length + 1).toString(),
+      ...newCabinetData,
+      capacity: newCabinetData.capacity,
+      used: 0,
+      status: 'active',
+      owner: user?.name || 'Александр',
+    };
+    setCabinets([newCabinet, ...cabinets]);
+    setIsCabinetModalOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card px-6 py-4">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold">Панель управления</h1>
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            <LayoutDashboard className="h-5 w-5 text-primary" />
+            Панель управления
+          </h1>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <User className="h-4 w-4" />
@@ -27,9 +67,11 @@ const Dashboard = () => {
       </header>
 
       <main className="container mx-auto py-8 px-4">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold tracking-tight">Добро пожаловать, {user?.name}!</h2>
-          <p className="text-muted-foreground">Ваша сводка за сегодня</p>
+        <div className="mb-8 flex justify-between items-end">
+          <div className="space-y-1">
+            <h2 className="text-3xl font-bold tracking-tight">Добро пожаловать, {user?.name}!</h2>
+            <p className="text-muted-foreground">Ваша сводка за сегодня</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -46,37 +88,66 @@ const Dashboard = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="p-6 rounded-xl border border-border bg-card">
-            <h3 className="text-lg font-semibold mb-4">Быстрые действия</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <button className="flex flex-col items-center justify-center p-4 rounded-lg border border-border hover:bg-muted transition-colors">
-                <FileText className="h-8 w-8 mb-2 text-primary" />
-                <span className="text-sm">Новый документ</span>
-              </button>
-              <button className="flex flex-col items-center justify-center p-4 rounded-lg border border-border hover:bg-muted transition-colors">
-                <Folder className="h-8 w-8 mb-2 text-primary" />
-                <span className="text-sm">Создать шкаф</span>
+        <div className="space-y-12">
+          <section>
+            <div className="flex items-center justify-between mb-6">
+              <div className="space-y-1">
+                <h3 className="text-xl font-bold">Мои шкафы</h3>
+                <p className="text-sm text-muted-foreground">Места хранения ваших документов</p>
+              </div>
+              <button 
+                onClick={() => setIsCabinetModalOpen(true)}
+                className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 transition-colors"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Новый шкаф
               </button>
             </div>
-          </div>
+            <CabinetList 
+              cabinets={cabinets} 
+              onCabinetClick={(cabinet) => setSelectedCabinet(cabinet)} 
+            />
+          </section>
 
-          <div className="p-6 rounded-xl border border-border bg-card">
-            <h3 className="text-lg font-semibold mb-4">Последние события</h3>
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center gap-4 text-sm border-b border-border last:border-0 pb-3 last:pb-0">
-                  <div className="h-2 w-2 rounded-full bg-primary" />
-                  <div className="flex-1">
-                    <p className="font-medium">Документ "Договор №{i}" был обновлен</p>
-                    <p className="text-muted-foreground text-xs">2 часа назад</p>
-                  </div>
-                </div>
-              ))}
+          <section>
+            <div className="flex items-center justify-between mb-6">
+              <div className="space-y-1">
+                <h3 className="text-xl font-bold">Ваши документы</h3>
+                <p className="text-sm text-muted-foreground">Список всех активных документов</p>
+              </div>
+              <button 
+                onClick={() => setIsDocModalOpen(true)}
+                className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 transition-colors"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Новый документ
+              </button>
             </div>
-          </div>
+            <DocumentList 
+              documents={documents} 
+              onDocumentClick={(doc) => console.log('Document clicked:', doc)} 
+            />
+          </section>
         </div>
       </main>
+
+      <CreateDocumentModal 
+        isOpen={isDocModalOpen} 
+        onClose={() => setIsDocModalOpen(false)} 
+        onSubmit={handleCreateDocument}
+        cabinets={cabinets}
+      />
+      <CreateCabinetModal 
+        isOpen={isCabinetModalOpen} 
+        onClose={() => setIsCabinetModalOpen(false)} 
+        onSubmit={handleCreateCabinet}
+      />
+      <CabinetDetailModal 
+        isOpen={!!selectedCabinet} 
+        onClose={() => setSelectedCabinet(null)} 
+        cabinet={selectedCabinet} 
+        documents={documents}
+      />
     </div>
   );
 };
