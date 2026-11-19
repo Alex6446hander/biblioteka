@@ -18,7 +18,10 @@ const AppContent = ({ currentPage, setCurrentPage }) => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+      <Header 
+        onLogin={() => setCurrentPage('login')} 
+        onRegister={() => setCurrentPage('register')} 
+      />
       
       <main className="flex-grow">
         {currentPage === 'landing' && <LandingPage />}
