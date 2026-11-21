@@ -1,12 +1,28 @@
-import React from 'react';
-import { X, FileText, Folder } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Folder, MoveRight, ChevronDown } from 'lucide-react';
 import { cn } from '../lib/utils';
 import DocumentCard from './DocumentCard';
+import { useLibrary } from '../context/LibraryContext';
 
-const CabinetDetailModal = ({ isOpen, onClose, cabinet, documents }) => {
+const CabinetDetailModal = ({ isOpen, onClose, cabinet }) => {
+  const { documents, cabinets, placeDocumentInCabinet } = useLibrary();
+  const [movingDocId, setMovingDocId] = useState(null);
+  const [targetCabinetId, setTargetCabinetId] = useState(null);
+
   if (!isOpen || !cabinet) return null;
 
   const cabinetDocuments = documents.filter(doc => doc.cabinetId === cabinet.id);
+
+  const handleMove = async (docId, targetId) => {
+    try {
+      await placeDocumentInCabinet(docId, targetId);
+      setMovingDocId(null);
+      setTargetCabinetId(null);
+    } catch (err) {
+      console.error("Ошибка при перемещении:", err);
+      alert(err.message);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -30,8 +46,66 @@ const CabinetDetailModal = ({ isOpen, onClose, cabinet, documents }) => {
           {cabinetDocuments.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {cabinetDocuments.map((doc) => (
-                <DocumentCard key={doc.id} document={doc} />
+                <div key={doc.id} className="relative group">
+                  <DocumentCard document={doc} />
+                  <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={() => setMovingDocId(doc.id)}
+                      className="p-1.5 bg-primary text-primary-foreground rounded-md shadow-md hover:bg-primary/90"
+                      title="Переместить"
+                    >
+                      <MoveRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
               ))}
+
+              {movingDocId && (
+                <div className="md:col-span-2 p-4 bg-primary/5 border border-primary/20 rounded-xl mt-2">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <MoveRight className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-medium">Переместить документ:</span>
+                      <span className="text-sm text-muted-foreground italic">
+                        {documents.find(d => d.id === movingDocId)?.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <select 
+                        className="px-3 py-1.5 rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        value={targetCabinetId || ''}
+                        onChange={(e) => setTargetCabinetId(e.target.value)}
+                      >
+                        <option value="" disabled>Выберите шкаф...</option>
+                        {cabinets
+                          .filter(cab => cab.id !== cabinet.id)
+                          .map(cab => (
+                            <option key={cab.id} value={cab.id}>
+                              {cab.name} ({cab.used}/{cab.capacity})
+                            </option>
+                          ))
+                        }
+                      </select>
+                      <button 
+                        onClick={() => handleMove(movingDocId, targetCabinetId)}
+                        disabled={!targetCabinetId}
+                        className="px-4 py-1.5 bg-primary text-primary-foreground rounded-md disabled:opacity-50 disabled:bg-muted"
+                      >
+                        Подтвердить
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setMovingDocId(null);
+                          setTargetCabinetId(null);
+                        }}
+                        className="text-xs text-muted-foreground underline"
+                      >
+                        Отмена
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-center">

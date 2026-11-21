@@ -1,52 +1,75 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FileText, Folder, Bell, User, Plus, LayoutDashboard } from 'lucide-react';
+import { useLibrary } from '../context/LibraryContext';
+import { FileText, Folder, Bell, User, Plus, LayoutDashboard, Search, Filter } from 'lucide-react';
 import { cn } from '../lib/utils';
 import DocumentList from '../components/DocumentList';
 import CreateDocumentModal from '../components/CreateDocumentModal';
 import CabinetList from '../components/CabinetList';
 import CreateCabinetModal from '../components/CreateCabinetModal';
 import CabinetDetailModal from '../components/CabinetDetailModal';
-import { MOCK_DOCUMENTS } from '../data/mockDocuments';
-import { MOCK_CABINETS } from '../data/mockCabinets';
+import Trash from '../components/Trash';
+import { DOCUMENT_TYPES, DOCUMENT_STATUSES } from '../constants/documentTypes';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [documents, setDocuments] = useState(MOCK_DOCUMENTS);
-  const [cabinets, setCabinets] = useState(MOCK_CABINETS);
+  const { 
+    documents, 
+    cabinets, 
+    trash,
+    addDocument, 
+    addCabinet, 
+    placeDocumentInCabinet,
+    restoreDocument,
+    deleteFromTrash
+  } = useLibrary();
+
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const [isCabinetModalOpen, setIsCabinetModalOpen] = useState(false);
   const [selectedCabinet, setSelectedCabinet] = useState(null);
+  
+  // Search and Filter States
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('All');
 
-  const stats = [
+  const stats = useMemo(() => [
     { label: 'Всего документов', value: documents.length, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-100' },
-    { label: 'В шкафах', value: cabinets.length, icon: Folder, color: 'text-emerald-600', bg: 'bg-emerald-100' },
-    { label: 'Ожидают проверки', value: '12', icon: Bell, color: 'text-amber-600', bg: 'bg-amber-100' },
-  ];
+    { label: 'В шкафах', value: documents.filter(doc => doc.cabinetId).length, icon: Folder, color: 'text-emerald-600', bg: 'bg-emerald-100' },
+    { label: 'Ожидают проверки', value: documents.filter(doc => doc.status === DOCUMENT_STATUSES.DRAFT).length, icon: Bell, color: 'text-amber-600', bg: 'bg-amber-100' },
+  ], [documents]);
+
+  // Filtering Logic
+  const filteredDocuments = useMemo(() => {
+    return documents.filter(doc => {
+      const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            doc.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesType = filterType === 'All' || doc.type === filterType;
+      return matchesSearch && matchesType;
+    });
+  }, [documents, searchTerm, filterType]);
 
   const handleCreateDocument = (newDocData) => {
-    const newDoc = {
-      id: (documents.length + 1).toString(),
-      ...newDocData,
-      status: 'Активный',
-      date: new Date().toISOString().split('T')[0],
-      owner: user?.name || 'Александр',
-    };
-    setDocuments([newDoc, ...documents]);
-    setIsDocModalOpen(false);
+    try {
+      addDocument({
+        ...newDocData,
+        owner: user?.name || 'Александр',
+      });
+      setIsDocModalOpen(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleCreateCabinet = (newCabinetData) => {
-    const newCabinet = {
-      id: (cabinets.length + 1).toString(),
-      ...newCabinetData,
-      capacity: newCabinetData.capacity,
-      used: 0,
-      status: 'active',
-      owner: user?.name || 'Александр',
-    };
-    setCabinets([newCabinet, ...cabinets]);
-    setIsCabinetModalOpen(false);
+    try {
+      addCabinet({
+        ...newCabinetData,
+        owner: user?.name || 'Александр',
+      });
+      setIsCabinetModalOpen(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -123,9 +146,48 @@ const Dashboard = () => {
                 Новый документ
               </button>
             </div>
+            
+            <div className="bg-card p-4 rounded-xl border border-border mb-6 space-y-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input 
+                    type="text" 
+                    placeholder="Поиск по названию или описанию..."
+                    className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <select 
+                    className="px-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                  >
+                    <option value="All">Все типы</option>
+                    {Object.entries(DOCUMENT_TYPES).map(([key, value]) => (
+                      <option key={key} value={value}>{value}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
             <DocumentList 
-              documents={documents} 
+              documents={filteredDocuments} 
               onDocumentClick={(doc) => console.log('Document clicked:', doc)} 
+            />
+          </section>
+
+          <section className="pt-8 border-t border-border">
+            <div className="space-y-1 mb-6">
+              <h3 className="text-xl font-bold">Корзина</h3>
+              <p className="text-sm text-muted-foreground">Удаленные документы</p>
+            </div>
+            <Trash 
+              trash={trash}
+              onRestore={(doc) => restoreDocument(doc.id)}
+              onDelete={(id) => deleteFromTrash(id)}
             />
           </section>
         </div>

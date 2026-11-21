@@ -3,8 +3,10 @@ import { X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import Input from './Input';
 import { DOCUMENT_TYPES } from '../constants/documentTypes';
+import { useLibrary } from '../context/LibraryContext';
 
-const CreateDocumentModal = ({ isOpen, onClose, onSubmit, cabinets }) => {
+const CreateDocumentModal = ({ isOpen, onClose }) => {
+  const { cabinets, addDocument } = useLibrary();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -20,8 +22,17 @@ const CreateDocumentModal = ({ isOpen, onClose, onSubmit, cabinets }) => {
       alert('Пожалуйста, выберите шкаф для хранения документа');
       return;
     }
-    onSubmit(formData);
-    setFormData({ name: '', description: '', type: DOCUMENT_TYPES.INTERNAL, cabinetId: '' });
+
+    try {
+      addDocument({
+        ...formData,
+        owner: 'Александр', // В реальном приложении здесь будет user.name из AuthContext
+      });
+      setFormData({ name: '', description: '', type: DOCUMENT_TYPES.INTERNAL, cabinetId: '' });
+      onClose();
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (

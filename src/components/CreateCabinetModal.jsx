@@ -3,8 +3,10 @@ import { X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { CABINET_TYPES } from '../constants/cabinetTypes';
 import Input from './Input';
+import { useLibrary } from '../context/LibraryContext';
 
-const CreateCabinetModal = ({ isOpen, onClose, onSubmit }) => {
+const CreateCabinetModal = ({ isOpen, onClose }) => {
+  const { addCabinet } = useLibrary();
   const [formData, setFormData] = useState({
     name: '',
     type: CABINET_TYPES.GENERAL,
@@ -15,8 +17,16 @@ const CreateCabinetModal = ({ isOpen, onClose, onSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
-    setFormData({ name: '', type: CABINET_TYPES.GENERAL, capacity: 50 });
+    try {
+      addCabinet({
+        ...formData,
+        owner: 'Александр', // В реальном приложении здесь будет user.name из AuthContext
+      });
+      setFormData({ name: '', type: CABINET_TYPES.GENERAL, capacity: 50 });
+      onClose();
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (

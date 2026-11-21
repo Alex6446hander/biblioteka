@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { LibraryProvider } from './context/LibraryContext';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -45,7 +46,9 @@ const App = () => {
 
   return (
     <AuthProvider>
-      <AppContent currentPage={currentPage} setCurrentPage={setCurrentPage} />
+      <LibraryProvider>
+        <AppContent currentPage={currentPage} setCurrentPage={setCurrentPage} />
+      </LibraryProvider>
     </AuthProvider>
   );
 };
