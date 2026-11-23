@@ -1,13 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLibrary } from '../context/LibraryContext';
-import { FileText, Folder, Bell, User, Plus, LayoutDashboard, Search, Filter } from 'lucide-react';
+import { FileText, Folder, Bell, User, Plus, LayoutDashboard, Search } from 'lucide-react';
 import { cn } from '../lib/utils';
 import DocumentList from '../components/DocumentList';
 import CreateDocumentModal from '../components/CreateDocumentModal';
 import CabinetList from '../components/CabinetList';
 import CreateCabinetModal from '../components/CreateCabinetModal';
 import CabinetDetailModal from '../components/CabinetDetailModal';
+import DocumentDetailModal from '../components/DocumentDetailModal';
+import EditDocumentModal from '../components/EditDocumentModal';
 import Trash from '../components/Trash';
 import { DOCUMENT_TYPES, DOCUMENT_STATUSES } from '../constants/documentTypes';
 
@@ -21,12 +23,16 @@ const Dashboard = () => {
     addCabinet, 
     placeDocumentInCabinet,
     restoreDocument,
-    deleteFromTrash
+    deleteFromTrash,
+    updateDocument,
+    deleteDocument
   } = useLibrary();
 
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const [isCabinetModalOpen, setIsCabinetModalOpen] = useState(false);
   const [selectedCabinet, setSelectedCabinet] = useState(null);
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
   // Search and Filter States
   const [searchTerm, setSearchTerm] = useState('');
@@ -70,6 +76,36 @@ const Dashboard = () => {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleEdit = (doc) => {
+    setSelectedDocument(doc);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDelete = (doc) => {
+    if (window.confirm(`Вы уверены, что хотите удалить "${doc.name}"?`)) {
+      deleteDocument(doc.id);
+      setSelectedDocument(null);
+    }
+  };
+
+  const handleMove = (doc) => {
+    const cabinetId = prompt('Введите ID шкафа для перемещения (например, cab-123):');
+    if (cabinetId) {
+      try {
+        placeDocumentInCabinet(doc.id, cabinetId);
+        setSelectedDocument(null);
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+  };
+
+  const handleSave = (id, updates) => {
+    updateDocument(id, updates);
+    setIsEditModalOpen(false);
+    setSelectedDocument(null);
   };
 
   return (
@@ -175,7 +211,7 @@ const Dashboard = () => {
             </div>
             <DocumentList 
               documents={filteredDocuments} 
-              onDocumentClick={(doc) => console.log('Document clicked:', doc)} 
+              onDocumentClick={setSelectedDocument} 
             />
           </section>
 
@@ -209,6 +245,21 @@ const Dashboard = () => {
         onClose={() => setSelectedCabinet(null)} 
         cabinet={selectedCabinet} 
         documents={documents}
+      />
+
+      <DocumentDetailModal 
+        isOpen={!!selectedDocument} 
+        onClose={() => setSelectedDocument(null)} 
+        document={selectedDocument} 
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onMove={handleMove}
+      />
+      <EditDocumentModal 
+        isOpen={isEditModalOpen} 
+        onClose={() => setIsEditModalOpen(false)} 
+        document={selectedDocument}
+        onSave={handleSave}
       />
     </div>
   );

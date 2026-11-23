@@ -1,6 +1,7 @@
 import React from 'react';
 import DocumentCard from './DocumentCard';
 import { DOCUMENT_TYPES } from '../constants/documentTypes';
+import { FileText } from 'lucide-react';
 
 const DocumentList = ({ documents, onDocumentClick }) => {
   if (documents.length === 0) {
